@@ -1,0 +1,11 @@
+---
+// "Dokumente" dashboard widget shell (server component). Renders the card chrome
+// + a hydrated island that fetches /documents/summary. Rendered by the Dashboard
+// host via virtual:frontend-widgets.
+import DocumentCount from "../islands/WidgetBody.tsx";
+---
+
+<article class="widget widget--documents">
+  <h3>Dokumente</h3>
+  <DocumentCount client:load />
+</article>

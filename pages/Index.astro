@@ -1,0 +1,11 @@
+---
+// Documents page, injected into the host build via the manifest's route slot.
+// Renders the customer document store (list + upload + download + rename +
+// signed links). Company scoping comes from the backend UserContext.
+import DocumentList from "../islands/DocumentList.tsx";
+---
+
+<section class="page page--documents">
+  <h1>Dokumente</h1>
+  <DocumentList client:load />
+</section>
