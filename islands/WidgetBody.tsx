@@ -16,5 +16,5 @@ export default function DocumentCount() {
       alive = false;
     };
   }, []);
-  return <p className="widget__metric">{count === null ? "…" : count}</p>;
+  return <p className="tds-widget__metric">{count === null ? "…" : count}</p>;
 }

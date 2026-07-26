@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Spinner } from "@tracht-digital-solutions/tds-shared/components";
 
 interface Document {
   id: number;
@@ -103,7 +104,7 @@ export default function DocumentList() {
 
   if (forbidden) return <p className="muted">Kein Zugriff auf Dokumente.</p>;
   if (error && docs === null) return <p className="error">{error}</p>;
-  if (docs === null) return <p className="muted">Wird geladen …</p>;
+  if (docs === null) return <p role="status"><Spinner /></p>;
 
   return (
     <div className="document-store">
