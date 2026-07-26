@@ -102,22 +102,22 @@ export default function DocumentList() {
     }
   }
 
-  if (forbidden) return <p className="muted">Kein Zugriff auf Dokumente.</p>;
-  if (error && docs === null) return <p className="error">{error}</p>;
+  if (forbidden) return <p className="marginalia">Kein Zugriff auf Dokumente.</p>;
+  if (error && docs === null) return <p className="tds-alert tds-alert--danger" role="alert">{error}</p>;
   if (docs === null) return <p role="status"><Spinner /></p>;
 
   return (
     <div className="document-store">
-      <div className="document-store__toolbar">
+      <div className="tds-toolbar">
         <label className="button">
           {uploading ? "Wird hochgeladen …" : "Datei hochladen"}
           <input ref={fileRef} type="file" onChange={upload} disabled={uploading} hidden />
         </label>
       </div>
-      {error && <p className="error">{error}</p>}
+      {error && <p className="tds-alert tds-alert--danger" role="alert">{error}</p>}
       {notice && <p className="notice">{notice}</p>}
       {docs.length === 0 ? (
-        <p className="muted">Noch keine Dokumente.</p>
+        <p className="marginalia">Noch keine Dokumente.</p>
       ) : (
         <table className="document-table">
           <thead>
