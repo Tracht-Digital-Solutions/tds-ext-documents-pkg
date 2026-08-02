@@ -102,24 +102,30 @@ export default function DocumentList() {
     }
   }
 
-  if (forbidden) return <p className="marginalia">Kein Zugriff auf Dokumente.</p>;
+  if (forbidden) return <p className="tds-empty">Kein Zugriff auf Dokumente.</p>;
   if (error && docs === null) return <p className="tds-alert tds-alert--danger" role="alert">{error}</p>;
   if (docs === null) return <p><Spinner /></p>;
 
   return (
-    <div className="document-store">
+    <div className="tds-stack">
       <div className="tds-toolbar">
-        <label className="button">
+        {/* A <label> wrapping a hidden file input is the standard pattern, but
+            it still has to LOOK like the button it is pretending to be — this
+            carried an undefined `.button` class, so it rendered as plain text.
+            `aria-busy` on the label is what conveys the upload; the input's
+            own `disabled` is invisible here. */}
+        <label className="btn btn-primary" aria-busy={uploading}>
+          {uploading ? <Spinner size="sm" /> : null}
           {uploading ? "Wird hochgeladen …" : "Datei hochladen"}
           <input ref={fileRef} type="file" onChange={upload} disabled={uploading} hidden />
         </label>
       </div>
       {error && <p className="tds-alert tds-alert--danger" role="alert">{error}</p>}
-      {notice && <p className="notice">{notice}</p>}
+      {notice && <p className="tds-alert" role="status">{notice}</p>}
       {docs.length === 0 ? (
-        <p className="marginalia">Noch keine Dokumente.</p>
+        <p className="tds-empty">Noch keine Dokumente.</p>
       ) : (
-        <table className="document-table">
+        <table className="tds-table">
           <thead>
             <tr><th>Name</th><th>Größe</th><th>Hochgeladen</th><th></th></tr>
           </thead>
@@ -128,10 +134,25 @@ export default function DocumentList() {
               <tr key={d.id}>
                 <td>
                   {renamingId === d.id ? (
-                    <span className="document-rename">
-                      <input value={renameDraft} onChange={(e) => setRenameDraft(e.target.value)} maxLength={255} />
-                      <button type="button" onClick={() => saveRename(d.id)}>OK</button>
-                      <button type="button" onClick={() => setRenamingId(null)}>×</button>
+                    <span className="tds-row">
+                      <input
+                        className="field-boxed"
+                        value={renameDraft}
+                        onChange={(e) => setRenameDraft(e.target.value)}
+                        maxLength={255}
+                        aria-label="Neuer Dateiname"
+                      />
+                      <button type="button" className="btn btn-primary" onClick={() => saveRename(d.id)}>
+                        OK
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-ghost"
+                        onClick={() => setRenamingId(null)}
+                        aria-label="Umbenennen abbrechen"
+                      >
+                        ×
+                      </button>
                     </span>
                   ) : (
                     d.filename
@@ -139,10 +160,20 @@ export default function DocumentList() {
                 </td>
                 <td>{fmtSize(d.size_bytes)}</td>
                 <td>{fmtDate(d.uploaded_at)}</td>
-                <td className="document-actions">
-                  <a href={`/documents/${d.id}/download`}>Download</a>
-                  <button type="button" onClick={() => { setRenamingId(d.id); setRenameDraft(d.filename); }}>Umbenennen</button>
-                  <button type="button" onClick={() => share(d.id)}>Link teilen</button>
+                <td>
+                  <span className="tds-toolbar">
+                    <a href={`/documents/${d.id}/download`}>Download</a>
+                    <button
+                      type="button"
+                      className="btn btn-ghost"
+                      onClick={() => { setRenamingId(d.id); setRenameDraft(d.filename); }}
+                    >
+                      Umbenennen
+                    </button>
+                    <button type="button" className="btn btn-ghost" onClick={() => share(d.id)}>
+                      Link teilen
+                    </button>
+                  </span>
                 </td>
               </tr>
             ))}

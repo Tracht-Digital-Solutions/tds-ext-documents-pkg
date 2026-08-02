@@ -332,7 +332,9 @@ describe("renaming", () => {
   it("abandons the rename without sending anything", async () => {
     const u = await open([DOC]);
     await startRename(u);
-    await u.click(screen.getByRole("button", { name: "×" }));
+    // "×" is the glyph, not the accessible name — the button carries an
+    // aria-label so screen-reader users hear what it abandons.
+    await u.click(screen.getByRole("button", { name: "Umbenennen abbrechen" }));
     expect(screen.queryByRole("button", { name: "OK" })).toBeNull();
     expect(sent("PATCH", /documents/)).toHaveLength(0);
   });
