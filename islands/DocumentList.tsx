@@ -104,7 +104,7 @@ export default function DocumentList() {
 
   if (forbidden) return <p className="marginalia">Kein Zugriff auf Dokumente.</p>;
   if (error && docs === null) return <p className="tds-alert tds-alert--danger" role="alert">{error}</p>;
-  if (docs === null) return <p role="status"><Spinner /></p>;
+  if (docs === null) return <p><Spinner /></p>;
 
   return (
     <div className="document-store">

@@ -40,7 +40,7 @@ describe("the widget", () => {
 
   it("shows a placeholder before the request resolves", () => {
     render(<WidgetBody />);
-    expect(screen.getByText("…")).toBeTruthy();
+    expect(document.querySelector('[aria-busy="true"]')).toBeTruthy();
   });
 
   it("renders the document count", async () => {
@@ -81,6 +81,6 @@ describe("the widget", () => {
     reply = "reject";
     render(<WidgetBody />);
     expect(await screen.findByText("0")).toBeTruthy();
-    expect(screen.queryByText("…")).toBeNull();
+    expect(document.querySelector('[aria-busy="true"]')).toBeNull();
   });
 });

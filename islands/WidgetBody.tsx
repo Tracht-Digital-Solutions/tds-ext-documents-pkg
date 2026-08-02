@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Skeleton } from "@tracht-digital-solutions/tds-shared/components";
 
 /**
  * "Dokumente" widget body. Fetches the document count from the manifest's
@@ -16,5 +17,7 @@ export default function DocumentCount() {
       alive = false;
     };
   }, []);
-  return <p className="tds-widget__metric">{count === null ? "…" : count}</p>;
+  return <p className="tds-widget__metric" aria-busy={count === null}>
+      {count === null ? <Skeleton width="3ch" height="1.75rem" /> : count}
+    </p>;
 }

@@ -105,7 +105,7 @@ describe("loading", () => {
 
   it("shows a loading line until the list arrives", () => {
     render(<DocumentList />);
-    expect(screen.getByText("Wird geladen …")).toBeTruthy();
+    expect(screen.getByLabelText("Wird geladen")).toBeTruthy();
   });
 
   it("says so when there are no documents", async () => {
