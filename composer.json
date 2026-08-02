@@ -3,7 +3,7 @@
   "description": "Customer↔owner document store extension for the TDS frontend platform (ported from tds-customer-api).",
   "type": "library",
   "license": "proprietary",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "require": {
     "php": ">=8.1",
     "slim/slim": "^4.13",
