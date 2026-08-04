@@ -1,6 +1,6 @@
 {
   "name": "@tracht-digital-solutions/tds-ext-documents",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Customer↔owner document store extension for the TDS frontend platform. Ships the frontend manifest, PHP Module, and the dual CI/publish pipeline.",
   "license": "UNLICENSED",
   "private": false,
