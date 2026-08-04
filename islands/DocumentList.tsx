@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Spinner } from "@tracht-digital-solutions/tds-shared/components";
+import { Spinner, toast } from "@tracht-digital-solutions/tds-shared/components";
 
 interface Document {
   id: number;
@@ -62,7 +62,7 @@ export default function DocumentList() {
       }
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Upload fehlgeschlagen.");
+      toast.danger(err instanceof Error ? err.message : "Upload fehlgeschlagen.");
     } finally {
       setUploading(false);
       if (fileRef.current) fileRef.current.value = "";
@@ -82,7 +82,7 @@ export default function DocumentList() {
       setRenamingId(null);
       await load();
     } catch {
-      setError("Umbenennen fehlgeschlagen.");
+      toast.danger("Umbenennen fehlgeschlagen.");
     }
   }
 
@@ -96,9 +96,9 @@ export default function DocumentList() {
       if (!r.ok) throw new Error(String(r.status));
       const d = await r.json();
       await navigator.clipboard?.writeText(d.url).catch(() => undefined);
-      setNotice("Link in die Zwischenablage kopiert (gültig bis " + new Date(d.expiresAt).toLocaleTimeString("de-DE") + ").");
+      toast.success("Link in die Zwischenablage kopiert (gültig bis " + new Date(d.expiresAt).toLocaleTimeString("de-DE") + ").");
     } catch {
-      setError("Link konnte nicht erstellt werden.");
+      toast.danger("Link konnte nicht erstellt werden.");
     }
   }
 
@@ -121,6 +121,8 @@ export default function DocumentList() {
         </label>
       </div>
       {error && <p className="tds-alert tds-alert--danger" role="alert">{error}</p>}
+      {/* Only the "signed links are not configured" hint reaches this now —
+          it names something an operator has to set, not an outcome. */}
       {notice && <p className="tds-alert" role="status">{notice}</p>}
       {docs.length === 0 ? (
         <p className="tds-empty">Noch keine Dokumente.</p>
