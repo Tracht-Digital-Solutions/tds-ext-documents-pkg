@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import DocumentList from "./DocumentList";
+import { TOAST_EVENT } from "@tracht-digital-solutions/tds-shared/toast";
 
 /**
  * The portal document store: list, upload, rename, download and "Link teilen".
@@ -55,7 +56,15 @@ const DOC = {
   uploaded_at: "2026-07-20 09:00:00",
 };
 
+/** Outcomes are toasts now — collected off the `tds:toast` bus. */
+let toasts: Array<{ variant: string; message: string }> = [];
+const collectToast = (e: Event) => {
+  toasts.push((e as CustomEvent<{ variant: string; message: string }>).detail);
+};
+
 beforeEach(() => {
+  toasts = [];
+  window.addEventListener(TOAST_EVENT, collectToast);
   calls = [];
   clipboardWrites = [];
   handlers = [() => ({ status: 200, body: {} })];
@@ -77,7 +86,10 @@ beforeEach(() => {
   );
 });
 
-afterEach(() => cleanup());
+afterEach(() => {
+  window.removeEventListener(TOAST_EVENT, collectToast);
+  cleanup();
+});
 
 const user = () => userEvent.setup({ delay: null });
 const sent = (method: string, match: RegExp) => calls.filter((c) => c.method === method && match.test(c.url));
@@ -219,21 +231,21 @@ describe("the upload", () => {
     respond(/^\/documents$/, { error: "Datei zu groß (max. 25 MB)." }, 413, "POST");
     const u = await open();
     await u.upload(fileInput(), pdf());
-    expect(await screen.findByText("Datei zu groß (max. 25 MB).")).toBeTruthy();
+    await waitFor(() => expect(toasts.some((t) => t.variant === "danger" && t.message.includes("Datei zu groß"))).toBe(true));
   });
 
   it("falls back to the status code when there is no message", async () => {
     respond(/^\/documents$/, {}, 500, "POST");
     const u = await open();
     await u.upload(fileInput(), pdf());
-    expect(await screen.findByText("500")).toBeTruthy();
+    await waitFor(() => expect(toasts.some((t) => t.variant === "danger" && t.message.includes("500"))).toBe(true));
   });
 
   it("does not reload the list after a failed upload", async () => {
     respond(/^\/documents$/, { error: "nope" }, 500, "POST");
     const u = await open();
     await u.upload(fileInput(), pdf());
-    await screen.findByText("nope");
+    await waitFor(() => expect(toasts.some((t) => t.variant === "danger" && t.message.includes("nope"))).toBe(true));
     expect(sent("GET", /^\/documents$/)).toHaveLength(1);
   });
 
@@ -243,7 +255,7 @@ describe("the upload", () => {
     respond(/^\/documents$/, { error: "nope" }, 500, "POST");
     const u = await open();
     await u.upload(fileInput(), pdf());
-    await screen.findByText("nope");
+    await waitFor(() => expect(toasts.some((t) => t.variant === "danger" && t.message.includes("nope"))).toBe(true));
     expect(fileInput().value).toBe("");
   });
 
@@ -324,7 +336,7 @@ describe("renaming", () => {
     const u = await open([DOC]);
     await startRename(u);
     await u.click(screen.getByRole("button", { name: "OK" }));
-    expect(await screen.findByText("Umbenennen fehlgeschlagen.")).toBeTruthy();
+    await waitFor(() => expect(toasts.some((t) => t.variant === "danger" && t.message.includes("Umbenennen fehlgeschlagen"))).toBe(true));
     expect(screen.getByRole("button", { name: "OK" })).toBeTruthy();
     expect(sent("GET", /^\/documents$/)).toHaveLength(1);
   });
@@ -388,7 +400,7 @@ describe("sharing a signed link", () => {
     respond(/sign$/, SIGNED, 200, "POST");
     const u = await open([DOC]);
     await share(u);
-    expect(await screen.findByText(/Link in die Zwischenablage kopiert \(gültig bis /)).toBeTruthy();
+    await waitFor(() => expect(toasts.some((t) => t.variant === "success" && t.message.includes("Link in die Zwischenablage kopiert"))).toBe(true));
   });
 
   it("NAMES an unconfigured signer instead of a generic failure", async () => {
@@ -413,7 +425,7 @@ describe("sharing a signed link", () => {
     respond(/sign$/, { error: "nope" }, 500, "POST");
     const u = await open([DOC]);
     await share(u);
-    expect(await screen.findByText("Link konnte nicht erstellt werden.")).toBeTruthy();
+    await waitFor(() => expect(toasts.some((t) => t.variant === "danger" && t.message.includes("Link konnte nicht erstellt werden"))).toBe(true));
   });
 
   it("signs the document whose button was pressed", async () => {
@@ -442,7 +454,7 @@ describe("sharing a signed link", () => {
     const u = await open([DOC]);
     setClipboard(undefined);
     await share(u);
-    expect(await screen.findByText(/Link in die Zwischenablage kopiert/)).toBeTruthy();
+    await waitFor(() => expect(toasts.some((t) => t.variant === "success" && t.message.includes("Link in die Zwischenablage kopiert"))).toBe(true));
     expect(screen.queryByText("Link konnte nicht erstellt werden.")).toBeNull();
   });
 
@@ -452,6 +464,6 @@ describe("sharing a signed link", () => {
     setClipboard({ writeText: async () => { throw new DOMException("denied"); } });
     await share(u);
     // The `.catch(() => undefined)` swallows it — the notice still appears.
-    expect(await screen.findByText(/Link in die Zwischenablage kopiert/)).toBeTruthy();
+    await waitFor(() => expect(toasts.some((t) => t.variant === "success" && t.message.includes("Link in die Zwischenablage kopiert"))).toBe(true));
   });
 });

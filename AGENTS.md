@@ -20,6 +20,12 @@ full port — this extension follows the same shape.
 
 ## Gotchas
 
+- **Two channels became one rule.** The island had `error` (danger) AND `notice`
+  (info) for outcomes; upload/rename/share-link outcomes are toasts now
+  (tds-shared `>=0.16.0`), `error` is the LOAD failure only, and `notice` keeps
+  just the "signed links are not configured" hint — a configuration problem, not
+  an outcome. Never mount a `ToastHost` here; the frontend host owns the one.
+
 - **No customer/project FK** — those entities live in another domain (auth /
   customer management), so `customer_id`/`project_id` are loose unsigned refs;
   `customer_id` = the JWT active company id (nullable = admin all-company view).
