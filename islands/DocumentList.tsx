@@ -134,7 +134,11 @@ export default function DocumentList() {
           <tbody>
             {docs.map((d) => (
               <tr key={d.id}>
-                <td>
+                {/* A filename is one unbroken token as often as not, and a
+                    table cell sizes to its content — so a long one set the
+                    whole table's min width and pushed the action column off
+                    a phone screen. */}
+                <td className="break-words">
                   {renamingId === d.id ? (
                     <span className="tds-row">
                       <input
