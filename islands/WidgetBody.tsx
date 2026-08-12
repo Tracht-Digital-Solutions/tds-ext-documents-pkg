@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Skeleton } from "@tracht-digital-solutions/tds-shared/components";
+import { apiFetch } from "@tracht-digital-solutions/tds-shared/api";
 
 /**
  * "Dokumente" widget body. Fetches the document count from the manifest's
@@ -9,7 +10,7 @@ export default function DocumentCount() {
   const [count, setCount] = useState<number | null>(null);
   useEffect(() => {
     let alive = true;
-    fetch("/documents/summary", { credentials: "include" })
+    apiFetch("/documents/summary")
       .then((r) => (r.ok ? r.json() : { count: 0 }))
       .then((d) => alive && setCount(Number(d.count ?? 0)))
       .catch(() => alive && setCount(0));

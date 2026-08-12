@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Spinner, toast } from "@tracht-digital-solutions/tds-shared/components";
+import { apiFetch } from "@tracht-digital-solutions/tds-shared/api";
 
 interface Document {
   id: number;
@@ -10,7 +11,7 @@ interface Document {
   uploaded_at: string;
 }
 
-const api = (path: string, init?: RequestInit) => fetch(path, { credentials: "include", ...init });
+const api = apiFetch;
 const fmtSize = (b: number) => (b < 1024 ? `${b} B` : b < 1048576 ? `${(b / 1024).toFixed(0)} KB` : `${(b / 1048576).toFixed(1)} MB`);
 const fmtDate = (iso: string) => new Date(iso.replace(" ", "T")).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" });
 
