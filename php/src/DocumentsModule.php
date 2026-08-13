@@ -13,6 +13,7 @@ use Tds\Ext\Documents\Domain\DocumentRepository;
 use Tds\Ext\Documents\Service\DocumentSigner;
 use Tds\Ext\Documents\Support\DocumentStorage;
 use Tds\Frontend\Contract\AbstractModule;
+use Tds\Frontend\Contract\ApiDocSource;
 use Tds\Frontend\Contract\PermissionDef;
 use Tds\Frontend\Contract\UserContext;
 
@@ -26,7 +27,7 @@ use Tds\Frontend\Contract\UserContext;
  * Signed URLs (`GET /documents/sign`) verify an HMAC ({@see DocumentSigner},
  * DOCUMENT_SIGN_SECRET) instead of the JWT, so they work in <img>/new tabs.
  */
-final class DocumentsModule extends AbstractModule
+final class DocumentsModule extends AbstractModule implements ApiDocSource
 {
     public function id(): string
     {
@@ -249,5 +250,16 @@ final class DocumentsModule extends AbstractModule
     {
         $res->getBody()->write(json_encode($data, JSON_THROW_ON_ERROR));
         return $res->withStatus($status)->withHeader('Content-Type', 'application/json');
+    }
+
+    /**
+     * Route documentation for the admin frontend's API reference. Kept in its
+     * own file so the prose does not sit in the middle of the wiring.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function apiDocs(): array
+    {
+        return require __DIR__ . '/../docs/api.php';
     }
 }
