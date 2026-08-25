@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { primeRuntimeConfig } from "@tracht-digital-solutions/tds-shared/api";
 import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import DocumentList from "./DocumentList";
@@ -115,6 +116,13 @@ async function open(documents: unknown[] = []) {
 const row = (name: string) => screen.getAllByRole("row").find((r) => r.textContent!.includes(name))!;
 const fileInput = () => document.querySelector('input[type="file"]') as HTMLInputElement;
 const pdf = (name = "Neu.pdf") => new File(["x"], name, { type: "application/pdf" });
+
+// apiFetch consults the host-side runtime config (/tds-runtime.json) before it
+// resolves a URL, so without this the first entry in fetch.mock.calls is that
+// probe rather than the endpoint under test. The panel products never ship the
+// file — they render <meta name="tds-api-base"> instead — so "absent" is also
+// what actually happens in production.
+beforeEach(() => primeRuntimeConfig(null));
 
 describe("loading", () => {
   it("reads the document list with credentials", async () => {
@@ -232,7 +240,12 @@ describe("the upload", () => {
     expect(call.raw).toBeInstanceOf(FormData);
     expect((call.raw as FormData).get("file")).toBeInstanceOf(File);
     expect(((call.raw as FormData).get("file") as File).name).toBe("Neu.pdf");
-    expect(call.headers).toBeUndefined();
+    // No hand-set Content-Type: it would strip the multipart boundary and the
+    // server would find no file. Asserted as "no such header" rather than
+    // "headers is undefined" — apiFetch passes an empty object now, which is
+    // the same thing to the browser, and the boundary is what actually matters.
+    const headers = new Headers((call.headers ?? {}) as HeadersInit);
+    expect(headers.get("content-type")).toBeNull();
   });
 
   it("reloads the list after a successful upload", async () => {
