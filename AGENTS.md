@@ -20,6 +20,12 @@ full port — this extension follows the same shape.
 
 ## Gotchas
 
+- **Bewusst KEINE Motion-Primitiven (Stand tds-shared 0.38.7).** Die
+  Dokumentliste ist eine `<table>`, und Transforms auf `<tr>` rendern je nach
+  Engine unzuverlaessig — dieselbe Entscheidung wie im Panel und im Shop. Das
+  Umbenennen tauscht nur eine Zelle; dafuer lohnt kein Wrapper. Kommt hier
+  einmal eine echte Liste dazu, gilt `tds-shared/motion/react` wie ueberall.
+
 - **Call the API with `apiFetch` from `@tracht-digital-solutions/tds-shared/api`,
   never a relative `fetch`.** Every island used to define its own
   `const api = (path, init) => fetch(path, { credentials: "include", ...init })`
