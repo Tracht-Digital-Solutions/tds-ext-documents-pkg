@@ -63,6 +63,12 @@ final class DocumentsModule extends AbstractModule implements ApiDocSource
             if (($deny = self::require($user, 'documents:read', $res)) !== null) {
                 return $deny;
             }
+            // A non-admin without an active company has no scope. null means
+            // "every company" to the repository, so the widget counted every
+            // tenant's rows.
+            if (!$user->isAdmin() && $user->activeCompanyId() === null) {
+                return self::json($res, ['count' => 0]);
+            }
             $cid = $user->activeCompanyId() !== null ? (int) $user->activeCompanyId() : null;
             return self::json($res, ['count' => $c->get(DocumentRepository::class)->countForCustomer($cid)]);
         });
