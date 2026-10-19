@@ -49,5 +49,5 @@
   render unreliably across engines. If a real list is added, use
   `tds-shared/motion/react` as elsewhere.
 - One rule for outcomes: upload, rename and share-link results are toasts (tds-shared
-  `>=0.16.0`). `error` is the load failure only. `notice` keeps only the "signed links are
-  not configured" hint, which is a configuration problem, not an outcome.
+  `>=0.16.0`). `error` is the load failure only. `notice` (an info `<Alert>`) keeps the "signed links are
+  not configured" hint and a share link the clipboard refused — things to read, not outcomes.

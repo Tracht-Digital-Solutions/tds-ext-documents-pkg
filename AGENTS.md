@@ -24,7 +24,8 @@ composer install && composer test   # phpunit
 - Call the API with `apiFetch` from `tds-shared/api`, never a relative `fetch`.
 - Uploads are multipart `FormData` with field `file` and **no** hand-set `Content-Type`.
 - Upload/rename/share outcomes are toasts; `error` is the load failure only. Never mount a `ToastHost`.
-- Keep the `iso.replace(" ", "T")` date normalisation; Safari needs it.
+- Dates, sizes, clipboard and the upload zone come from tds-shared (`./format`, `./clipboard`, `./dropzone`);
+  `parseDate` keeps the SQL-space normalisation Safari needs. The download link is `apiUrl(…)`, never relative.
 - Every route change updates `php/docs/api.php` (a parity test enforces it).
 - Migration class name and version prefix stay unique across all extensions.
 - No CSS; shared `tds-shared` classes only. Versions move via the release workflow only.

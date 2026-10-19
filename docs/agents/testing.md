@@ -39,8 +39,10 @@ assertions:
   so explicitly; a generic error would invite endless retries.
 - **403 is its own state**, not an error: the user has no document access, and the
   upload control is absent.
-- `fmtSize` is pinned at both boundaries (1023/1024 B, 1048575/1048576 B) and on its
-  decimal places.
+- The size cell (tds-shared `formatBytes`) is pinned at both boundaries (1023/1024 B,
+  1048575/1048576 B) and on its decimal comma.
+- The download link is absolute on the API host; a relative one resolved against the
+  portal, which has no such route.
 
 ### Other suites
 
@@ -54,13 +56,12 @@ assertions:
 - **`userEvent.setup()` installs its own `navigator.clipboard` stub.** Define a
   clipboard fake **after** creating the user, or the share tests observe nothing. jsdom
   has no clipboard and `navigator` is read-only, so use `Object.defineProperty`.
-- `navigator.clipboard?.writeText(url).catch(…)` is safe without a clipboard: optional
-  chaining short-circuits the whole chain. An insecure-context browser still gets the
-  confirmation, just not the copy. Asserted as graceful degradation.
+- The copy goes through tds-shared `copyText`, which resolves `false` when nothing was
+  copied. Then the link is shown in-flow (`role="status"`), never a "kopiert" toast.
+  Stub `document.execCommand` too, or its fallback decides the outcome.
 
 ### Known blind spot
 
-Mutation check: 44 breakages, 43 caught. Dropping `iso.replace(" ", "T")` in `fmtDate`
-is equivalent under V8 (Node parses `"2026-07-20 09:00:00"`), but **not** in
-Safari/WebKit, where the space form is an Invalid Date. Keep the normalisation; a jsdom
-suite can't catch it.
+The SQL-space normalisation (`"2026-07-20 09:00:00"` → `T`) now lives in tds-shared
+`parseDate`. It is equivalent under V8 but **not** in Safari/WebKit, where the space form
+is an Invalid Date; a jsdom suite can't catch it, so it stays in the shared code.

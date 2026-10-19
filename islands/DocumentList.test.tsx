@@ -151,7 +151,7 @@ describe("loading", () => {
     await open([DOC]);
     await screen.findByText("Angebot.pdf");
     const cells = within(row("Angebot.pdf")).getAllByRole("cell");
-    expect(cells[1]!.textContent).toBe("2 KB");
+    expect(cells[1]!.textContent).toBe("2,0 KB");
     expect(cells[2]!.textContent).toBe("20.07.2026");
   });
 
@@ -209,19 +209,20 @@ describe("the size format", () => {
     expect(await sizeOf(512)).toBe("512 B");
   });
 
+  // tds-shared `formatBytes`: German decimal comma, one decimal above bytes.
   it("switches to KB exactly at 1024", async () => {
-    expect(await sizeOf(1023)).toBe("1023 B");
-    expect(await sizeOf(1024)).toBe("1 KB");
+    expect(await sizeOf(1023)).toBe("1.023 B");
+    expect(await sizeOf(1024)).toBe("1,0 KB");
   });
 
-  it("switches to MB exactly at a megabyte", async () => {
-    expect(await sizeOf(1048575)).toBe("1024 KB");
-    expect(await sizeOf(1048576)).toBe("1.0 MB");
+  it("steps up to MB once the rounded value reaches 1024", async () => {
+    expect(await sizeOf(1048575)).toBe("1,0 MB");
+    expect(await sizeOf(1048576)).toBe("1,0 MB");
   });
 
-  it("keeps one decimal for megabytes and none for kilobytes", async () => {
-    expect(await sizeOf(5 * 1048576 + 524288)).toBe("5.5 MB");
-    expect(await sizeOf(1536)).toBe("2 KB");
+  it("keeps one decimal above bytes", async () => {
+    expect(await sizeOf(5 * 1048576 + 524288)).toBe("5,5 MB");
+    expect(await sizeOf(1536)).toBe("1,5 KB");
   });
 
   it("renders a zero-byte file as 0 B, not as an empty cell", async () => {
@@ -391,13 +392,14 @@ describe("downloading", () => {
     await open([DOC]);
     await screen.findByText("Angebot.pdf");
     const link = within(row("Angebot.pdf")).getByRole("link", { name: "Download" }) as HTMLAnchorElement;
-    expect(link.getAttribute("href")).toBe("/documents/4/download");
+    // Absolute, on the API: the portal host has no such route.
+    expect(link.getAttribute("href")).toBe("https://api.tracht-digital.de/documents/4/download");
   });
 
   it("gives each row its own download link", async () => {
     await open([DOC, { ...DOC, id: 9, filename: "Vertrag.pdf" }]);
     await screen.findByText("Vertrag.pdf");
-    expect(within(row("Vertrag.pdf")).getByRole("link").getAttribute("href")).toBe("/documents/9/download");
+    expect(within(row("Vertrag.pdf")).getByRole("link").getAttribute("href")).toBe("https://api.tracht-digital.de/documents/9/download");
   });
 });
 
@@ -472,25 +474,26 @@ describe("sharing a signed link", () => {
     expect(sent("GET", /^\/documents$/)).toHaveLength(1);
   });
 
-  it("degrades gracefully when the browser exposes no clipboard", async () => {
-    // `navigator.clipboard?.writeText(url).catch(…)` short-circuits the WHOLE
-    // chain — including the `.catch()` — when clipboard is undefined, so an
-    // insecure-context browser gets the confirmation without an exception.
-    // (The URL is then only in the notice, not on the clipboard.)
+  // Until 0.x the island toasted "kopiert" whatever the clipboard did. A link
+  // that was NOT copied has to be readable, so it goes in-flow instead.
+  it("shows the link in-flow when the browser exposes no clipboard", async () => {
     respond(/sign$/, SIGNED, 200, "POST");
     const u = await open([DOC]);
     setClipboard(undefined);
+    document.execCommand = () => false;
     await share(u);
-    await waitFor(() => expect(toasts.some((t) => t.variant === "success" && t.message.includes("Link in die Zwischenablage kopiert"))).toBe(true));
+    await waitFor(() => expect(screen.getByRole("status").textContent).toContain(SIGNED.url));
+    expect(toasts.some((t) => t.variant === "success")).toBe(false);
     expect(screen.queryByText("Link konnte nicht erstellt werden.")).toBeNull();
   });
 
-  it("still reports an error when the clipboard write itself rejects", async () => {
+  it("does not claim a copy the clipboard refused", async () => {
     respond(/sign$/, SIGNED, 200, "POST");
     const u = await open([DOC]);
     setClipboard({ writeText: async () => { throw new DOMException("denied"); } });
+    document.execCommand = () => false;
     await share(u);
-    // The `.catch(() => undefined)` swallows it — the notice still appears.
-    await waitFor(() => expect(toasts.some((t) => t.variant === "success" && t.message.includes("Link in die Zwischenablage kopiert"))).toBe(true));
+    await waitFor(() => expect(screen.getByRole("status").textContent).toContain(SIGNED.url));
+    expect(toasts.some((t) => t.variant === "success")).toBe(false);
   });
 });

@@ -1,6 +1,9 @@
-import { useEffect, useRef, useState } from "react";
-import { Spinner, toast } from "@tracht-digital-solutions/tds-shared/components";
-import { apiFetch } from "@tracht-digital-solutions/tds-shared/api";
+import { useEffect, useState } from "react";
+import { Alert, Spinner, toast } from "@tracht-digital-solutions/tds-shared/components";
+import { apiFetch, apiUrl, sendJson } from "@tracht-digital-solutions/tds-shared/api";
+import { copyText } from "@tracht-digital-solutions/tds-shared/clipboard";
+import { FileDropZone } from "@tracht-digital-solutions/tds-shared/dropzone";
+import { formatBytes, formatDate } from "@tracht-digital-solutions/tds-shared/format";
 
 interface Document {
   id: number;
@@ -11,9 +14,6 @@ interface Document {
   uploaded_at: string;
 }
 
-const api = apiFetch;
-const fmtSize = (b: number) => (b < 1024 ? `${b} B` : b < 1048576 ? `${(b / 1024).toFixed(0)} KB` : `${(b / 1048576).toFixed(1)} MB`);
-const fmtDate = (iso: string) => new Date(iso.replace(" ", "T")).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" });
 
 /**
  * Portal document store (ported from tds-customer-legacy-frontend's Documents).
@@ -29,10 +29,9 @@ export default function DocumentList() {
   const [renamingId, setRenamingId] = useState<number | null>(null);
   const [renameDraft, setRenameDraft] = useState("");
   const [notice, setNotice] = useState<string | null>(null);
-  const fileRef = useRef<HTMLInputElement | null>(null);
 
   const load = () =>
-    api("/documents")
+    apiFetch("/documents")
       .then((r) => {
         if (r.status === 403) {
           setForbidden(true);
@@ -48,15 +47,15 @@ export default function DocumentList() {
     void load();
   }, []);
 
-  async function upload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
+  async function upload(files: File[]) {
+    const file = files[0];
     if (!file) return;
     setUploading(true);
     setError(null);
     try {
       const fd = new FormData();
       fd.append("file", file);
-      const r = await api("/documents", { method: "POST", body: fd });
+      const r = await apiFetch("/documents", { method: "POST", body: fd });
       if (!r.ok) {
         const d = await r.json().catch(() => ({}));
         throw new Error(d.error ?? String(r.status));
@@ -66,7 +65,6 @@ export default function DocumentList() {
       toast.danger(err instanceof Error ? err.message : "Upload fehlgeschlagen.");
     } finally {
       setUploading(false);
-      if (fileRef.current) fileRef.current.value = "";
     }
   }
 
@@ -74,11 +72,7 @@ export default function DocumentList() {
     const name = renameDraft.trim();
     if (!name) return;
     try {
-      const r = await api(`/documents/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ filename: name }),
-      });
+      const r = await sendJson(`/documents/${id}`, "PATCH", { filename: name });
       if (!r.ok) throw new Error(String(r.status));
       setRenamingId(null);
       await load();
@@ -89,42 +83,43 @@ export default function DocumentList() {
 
   async function share(id: number) {
     try {
-      const r = await api(`/documents/${id}/sign`, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
+      const r = await sendJson(`/documents/${id}/sign`, "POST", {});
       if (r.status === 503) {
         setNotice("Signierte Links sind nicht konfiguriert.");
         return;
       }
       if (!r.ok) throw new Error(String(r.status));
       const d = await r.json();
-      await navigator.clipboard?.writeText(d.url).catch(() => undefined);
-      toast.success("Link in die Zwischenablage kopiert (gültig bis " + new Date(d.expiresAt).toLocaleTimeString("de-DE") + ").");
+      const until = new Date(d.expiresAt).toLocaleTimeString("de-DE");
+      if (await copyText(d.url)) {
+        toast.success(`Link in die Zwischenablage kopiert (gültig bis ${until}).`);
+      } else {
+        // Something to copy stays in the flow: the clipboard refused (insecure
+        // origin, denied permission), so the link has to be readable here.
+        setNotice(`Link (gültig bis ${until}): ${d.url}`);
+      }
     } catch {
       toast.danger("Link konnte nicht erstellt werden.");
     }
   }
 
   if (forbidden) return <p className="tds-empty">Kein Zugriff auf Dokumente.</p>;
-  if (error && docs === null) return <p className="tds-alert tds-alert--danger" role="alert">{error}</p>;
+  if (error && docs === null) return <Alert>{error}</Alert>;
   if (docs === null) return <p><Spinner /></p>;
 
   return (
     <div className="tds-stack">
-      <div className="tds-toolbar">
-        {/* A <label> wrapping a hidden file input is the standard pattern, but
-            it still has to LOOK like the button it is pretending to be — this
-            carried an undefined `.button` class, so it rendered as plain text.
-            `aria-busy` on the label is what conveys the upload; the input's
-            own `disabled` is invisible here. */}
-        <label className="btn btn-primary" aria-busy={uploading}>
-          {uploading ? <Spinner size="sm" /> : null}
-          {uploading ? "Wird hochgeladen …" : "Datei hochladen"}
-          <input ref={fileRef} type="file" onChange={upload} disabled={uploading} hidden />
-        </label>
-      </div>
-      {error && <p className="tds-alert tds-alert--danger" role="alert">{error}</p>}
-      {/* Only the "signed links are not configured" hint reaches this now —
-          it names something an operator has to set, not an outcome. */}
-      {notice && <p className="tds-alert" role="status">{notice}</p>}
+      <FileDropZone
+        label={uploading ? "Wird hochgeladen …" : "Datei hochladen"}
+        hint="oder hierher ziehen"
+        activeLabel="Loslassen zum Hochladen"
+        disabled={uploading}
+        onFiles={(files) => void upload(files)}
+      />
+      <Alert>{error}</Alert>
+      {/* An operator hint ("signed links are not configured") or a link the
+          clipboard refused — something to read, not an outcome. */}
+      <Alert tone="info">{notice}</Alert>
       {docs.length === 0 ? (
         <p className="tds-empty">Noch keine Dokumente.</p>
       ) : (
@@ -165,11 +160,13 @@ export default function DocumentList() {
                     d.filename
                   )}
                 </td>
-                <td>{fmtSize(d.size_bytes)}</td>
-                <td>{fmtDate(d.uploaded_at)}</td>
+                <td>{formatBytes(d.size_bytes)}</td>
+                <td>{formatDate(d.uploaded_at)}</td>
                 <td>
                   <span className="tds-toolbar">
-                    <a href={`/documents/${d.id}/download`}>Download</a>
+                    {/* Absolute: the route lives on the API, and a relative
+                        href resolved against the portal host, which has none. */}
+                    <a href={apiUrl(`/documents/${d.id}/download`)}>Download</a>
                     <button
                       type="button"
                       className="btn btn-ghost"
