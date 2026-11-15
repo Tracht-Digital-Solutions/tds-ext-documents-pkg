@@ -29,6 +29,7 @@ composer install && composer test   # phpunit
 - Every route change updates `php/docs/api.php` (a parity test enforces it).
 - Migration class name and version prefix stay unique across all extensions.
 - No CSS; shared `tds-shared` classes only. Versions move via the release workflow only.
+- Follows the TDS quality standard (`../tds-ops/standards/quality.md`): no AI slop, clean code.
 
 ## Topic files
 

@@ -60,7 +60,7 @@ return [
             ['status' => 401, 'description' => 'Keine Sitzung.'],
             ['status' => 403, 'description' => 'Kein `documents:write`.'],
             ['status' => 413, 'description' => 'Datei größer als 25 MB.'],
-            ['status' => 415, 'description' => 'Mime-Typ nicht erlaubt — der abgelehnte Typ steht in der Antwort.'],
+            ['status' => 415, 'description' => 'Mime-Typ nicht erlaubt, der abgelehnte Typ steht in der Antwort.'],
             ['status' => 422, 'description' => 'Keine aktive Firma.'],
             ['status' => 503, 'description' => 'Dokumentenablage nicht verfügbar (kein beschreibbares Verzeichnis).'],
         ],
@@ -71,7 +71,7 @@ return [
         'summary' => 'Dokument umbenennen',
         'description' => 'Der Name wird bereinigt: alles außer Buchstaben, Ziffern, Punkt, '
             . 'Unterstrich, Leerzeichen und Bindestrich wird durch `_` ersetzt. Der '
-            . 'tatsächlich gespeicherte Name steht in der Antwort — er kann vom '
+            . 'tatsächlich gespeicherte Name steht in der Antwort, er kann vom '
             . 'gesendeten abweichen.',
         'permission' => 'documents:write',
         'params' => [
@@ -79,7 +79,7 @@ return [
             ['in' => 'body', 'name' => 'filename', 'type' => 'string', 'required' => true, 'description' => '1 bis 255 Zeichen.'],
         ],
         'responses' => [
-            ['status' => 200, 'description' => '`{id, filename}` — der bereinigte Name.'],
+            ['status' => 200, 'description' => '`{id, filename}`, der bereinigte Name.'],
             ['status' => 401, 'description' => 'Keine Sitzung.'],
             ['status' => 403, 'description' => 'Kein `documents:write`.'],
             ['status' => 404, 'description' => 'Dokument gehört nicht zur aktiven Firma oder existiert nicht.'],
@@ -110,7 +110,7 @@ return [
         'summary' => 'Kurzlebigen, signierten Download-Link erzeugen',
         'description' => 'Für Fälle, in denen die Datei ohne Sitzung erreichbar sein muss '
             . '(E-Mail-Anhang-Ersatz, externer Betrachter). Der Link ist HMAC-signiert '
-            . 'und trägt sein Ablaufdatum in sich — er wird nirgends gespeichert und '
+            . 'und trägt sein Ablaufdatum in sich, er wird nirgends gespeichert und '
             . 'kann daher auch nicht zurückgezogen werden. Die Gültigkeitsdauer wird '
             . 'auf 30 bis 3600 Sekunden begrenzt.',
         'permission' => 'documents:read',
@@ -131,7 +131,7 @@ return [
         'pattern' => '/documents/sign',
         'summary' => 'Download über einen signierten Link (ohne Sitzung)',
         'description' => 'Die Gegenstelle zu `POST /documents/{id}/sign`. Es wird **kein** '
-            . 'JWT geprüft — die Signatur ist der Nachweis. Sie deckt Dokument-Id, '
+            . 'JWT geprüft, die Signatur ist der Nachweis. Sie deckt Dokument-Id, '
             . 'Firmen-Id und Ablaufzeitpunkt ab, sodass keiner der Parameter einzeln '
             . 'verändert werden kann.',
         'auth' => 'token',

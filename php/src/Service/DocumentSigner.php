@@ -19,7 +19,7 @@ final class DocumentSigner
     public function __construct(private readonly string $secret)
     {
         if ($this->secret === '') {
-            throw new \InvalidArgumentException('DOCUMENT_SIGN_SECRET is empty — set a strong random string');
+            throw new \InvalidArgumentException('DOCUMENT_SIGN_SECRET is empty, set a strong random string');
         }
     }
 
