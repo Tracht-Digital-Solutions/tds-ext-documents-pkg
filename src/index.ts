@@ -1,4 +1,4 @@
-import { defineExtension } from "@tracht-digital-solutions/tds-frontend-contract";
+import { defineExtension } from "@tracht-digital-labs/tds-frontend-contract";
 
 /**
  * Documents extension — the customer document store, ported from tds-customer-api
@@ -33,7 +33,7 @@ export default defineExtension({
     {
       id: "documents-count",
       title: "Dokumente",
-      island: "@tracht-digital-solutions/tds-ext-documents/widgets/Widget.astro",
+      island: "@tracht-digital-labs/tds-ext-documents/widgets/Widget.astro",
       size: "sm",
       permission: "documents:read",
       dataEndpoint: "/documents/summary",
@@ -43,7 +43,7 @@ export default defineExtension({
   routes: [
     {
       pattern: "/documents",
-      entrypoint: "@tracht-digital-solutions/tds-ext-documents/pages/Index.astro",
+      entrypoint: "@tracht-digital-labs/tds-ext-documents/pages/Index.astro",
       permission: "documents:read",
     },
   ],

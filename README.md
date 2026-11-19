@@ -6,7 +6,7 @@ feature can retire the legacy customer portal (`tds-customer-legacy-frontend`).
 
 Ships both halves of a panel extension:
 
-- **Frontend manifest** (`@tracht-digital-solutions/tds-ext-documents`) — a nav
+- **Frontend manifest** (`@tracht-digital-labs/tds-ext-documents`) — a nav
   entry, the `/documents` route, an unread-count dashboard widget, and
   `documents:read` / `documents:write` permissions.
 - **PHP Module** (`tracht-digital-solutions/tds-ext-documents`, namespace

@@ -1,5 +1,5 @@
 {
-  "name": "@tracht-digital-solutions/tds-ext-documents",
+  "name": "@tracht-digital-labs/tds-ext-documents",
   "version": "0.1.14",
   "description": "Customer↔owner document store extension for the TDS frontend platform. Ships the frontend manifest, PHP Module, and the dual CI/publish pipeline.",
   "license": "UNLICENSED",
@@ -32,10 +32,10 @@
     "test:run": "vitest run"
   },
   "dependencies": {
-    "@tracht-digital-solutions/tds-frontend-contract": "^1.0.0"
+    "@tracht-digital-labs/tds-frontend-contract": "^1.0.0"
   },
   "peerDependencies": {
-    "@tracht-digital-solutions/tds-shared": ">=0.59.1",
+    "@tracht-digital-labs/tds-shared": ">=0.59.1",
     "astro": ">=6",
     "react": ">=18",
     "react-dom": ">=18"
@@ -60,6 +60,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Tracht-Digital-Solutions/tds-ext-documents-pkg.git"
+    "url": "git+https://github.com/Tracht-Digital-Labs/tds-ext-documents-pkg.git"
   }
 }

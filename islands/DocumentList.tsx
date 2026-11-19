@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { Alert, Spinner, toast } from "@tracht-digital-solutions/tds-shared/components";
-import { apiFetch, apiUrl, sendJson } from "@tracht-digital-solutions/tds-shared/api";
-import { copyText } from "@tracht-digital-solutions/tds-shared/clipboard";
-import { FileDropZone } from "@tracht-digital-solutions/tds-shared/dropzone";
-import { formatBytes, formatDate } from "@tracht-digital-solutions/tds-shared/format";
+import { Alert, Spinner, toast } from "@tracht-digital-labs/tds-shared/components";
+import { apiFetch, apiUrl, sendJson } from "@tracht-digital-labs/tds-shared/api";
+import { copyText } from "@tracht-digital-labs/tds-shared/clipboard";
+import { FileDropZone } from "@tracht-digital-labs/tds-shared/dropzone";
+import { formatBytes, formatDate } from "@tracht-digital-labs/tds-shared/format";
 
 interface Document {
   id: number;

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { composeExtensions } from "@tracht-digital-solutions/tds-frontend-contract";
+import { composeExtensions } from "@tracht-digital-labs/tds-frontend-contract";
 import manifest from "./index";
 
 /**
@@ -112,7 +112,7 @@ describe("nav, routes and widgets", () => {
     expect(specifiers.length).toBeGreaterThan(0);
     for (const spec of specifiers) {
       expect(spec, `${spec} does not live in this package`).toMatch(
-        /^@tracht-digital-solutions\/tds-ext-documents\//,
+        /^@tracht-digital-labs\/tds-ext-documents\//,
       );
     }
   });

@@ -35,7 +35,7 @@ one for a genuinely singular internal, knowing it stays unstyled.
 
 - **Never interpolate a class name** (`` `chip chip--${status}` ``). Tailwind can't
   extract it, and an unknown value renders unstyled. Map explicitly with a fallback; for
-  database values use `resolveChipVariant()` from `@tracht-digital-solutions/tds-shared/design`.
+  database values use `resolveChipVariant()` from `@tracht-digital-labs/tds-shared/design`.
 - **`.status-pill` is an inline label, not a banner.** Use `.tds-alert` for a block message.
 - **A JSX comment can't sit in an expression position** (after `=> (`, in a ternary
   branch, in a `.map()` return). Put the note above the `return`, or the build fails
@@ -44,7 +44,7 @@ one for a genuinely singular internal, knowing it stays unstyled.
 ## API calls: `apiFetch`, never a relative `fetch`
 
 ```tsx
-import { apiFetch } from "@tracht-digital-solutions/tds-shared/api";
+import { apiFetch } from "@tracht-digital-labs/tds-shared/api";
 ```
 
 A relative `fetch` resolves against the product's own host, whose SPA fallback answers
@@ -62,7 +62,7 @@ A JSON body goes through `sendJson(path, method, body)`; failure text through
 ## Mutation outcomes: toasts
 
 ```tsx
-import { toast } from "@tracht-digital-solutions/tds-shared/components";
+import { toast } from "@tracht-digital-labs/tds-shared/components";
 ```
 
 - **Never `await` a mutation and drop the response.** Otherwise a 403 looks like

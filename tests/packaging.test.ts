@@ -95,7 +95,7 @@ describe("published surface", () => {
 
 describe("dependency hygiene", () => {
   it("depends on the contract, not on a sibling path", () => {
-    const contract = "@tracht-digital-solutions/tds-frontend-contract";
+    const contract = "@tracht-digital-labs/tds-frontend-contract";
     const range = pkg.dependencies?.[contract] ?? pkg.peerDependencies?.[contract];
     expect(range, "the contract must be a declared dependency").toBeDefined();
     expect(range, "a file:/link: range never resolves for a consumer").not.toMatch(/^(file:|link:)/);
